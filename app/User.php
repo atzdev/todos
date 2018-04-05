@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'avatar', 'email', 'password',
     ];
 
     /**
@@ -26,4 +26,19 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function todos () 
+    {
+        return $this->hasMany('App\Todo');
+    }
+
+    public function getAvatarAttribute($avatar)
+    {
+        if ($avatar == 'empty') {
+            return asset('avatar01.png');
+        } else {
+            return $avatar;    
+        }
+        
+    }
 }

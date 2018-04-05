@@ -1,50 +1,57 @@
 @extends('layout')
 
 @section('content')
-<div class="row">
-    <div class="col-md-offset-1 col-md-10 col-md-offset-1">
-        <div class="col-md-6">
 
-        </div>
-        <div class="col-md-6">
-            
-                {{ csrf_field() }}
-                <div class="form-group row">
-                    <div class="col-md-10 text-right">
-                        <input type="text" class="form-control" id="todo" name="todo">
-                    </div>
-                    <div class="col-md-2 text-left">
-                        <button type="btn" class="btn btn-primary btn-add">Add</button>
-                    </div>
+
+
+<div class="row content-box">
+    <div class="col-md-offset-1 col-md-10 col-md-offset-1">
+    
+        <div class="col-md-6 col-sm-6"></div>
+        <div class="col-md-6 col-sm-6">
+            {{ csrf_field() }}
+            <div class="form-group row">
+                <div class="col-md-10 col-sm-10 col-xs-10 text-right">
+                    <input type="text" class="form-control" id="todo" name="todo">
                 </div>
-            
+                <div class="col-md-2 col-sm-2 col-xs-2">
+                    <button type="btn" class="btn btn-primary btn-add">Add</button>
+                </div>
+            </div>
         </div>
+                
     </div>
 </div>
-<div class="row">
+
+<div class="row content-box">
     <div class="col-md-offset-1 col-md-10 col-md-offset-1">
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
                     <th class="text-center">Todo</th>
                     <th class="text-right">Updated</th>
-                    <th class="text-center">Complete</th>
+                    <th class="text-right">Complete</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($todos as $todo)
+
+                @forelse($todos as $todo)
                 <tr id="row{{ $todo->id }}">
                     <td><a href="#" data-toggle="popover" data-trigger="hover" data-content="{{ $todo->todo }}" style="text-decoration: none;">{{ str_limit($todo->todo, 50) }}</a></td>
-                    <td class="text-right">{{ $todo->updated_at->diffForHumans() }}</td>
-                    <td class="text-center">
+                    <td class="text-right">{{ $todo->updated_at->format('d/m/y') }}</td>
+                    <td class="text-right">
                         @if($todo->complete == 1)
-                            <a class="btn btn-success btn-xs" onclick="updateTodo({{ $todo->id }})"><i class="glyphicon glyphicon-ok"></i></a>
+                            <a class="btn btn-success" onclick="updateTodo({{ $todo->id }})"><i class="glyphicon glyphicon-ok"></i></a>
                         @else
-                            <a class="btn btn-warning btn-xs" onclick="updateTodo({{ $todo->id }})"><i class="glyphicon glyphicon-remove"></i></a>
+                            <a class="btn btn-warning" onclick="updateTodo({{ $todo->id }})"><i class="glyphicon glyphicon-time"></i></a>
                         @endif
                     </td>
                 </tr>
-                @endforeach
+                @empty
+                <tr id="row0">
+                    <td colspan="3"></td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
         {{ $todos->links() }}
@@ -65,7 +72,9 @@
                         
                         var todo = $("#todo").val();
                         //toastr.info(todo);
+
                         var token = $("input[name='_token']").val();
+                        console.log(token);
                         $.ajaxSetup({
                             headers: {
                                 'X-CSRF_TOKEN': token
@@ -75,17 +84,20 @@
                         $.ajax({
                             type: 'post',
                             url: '/todo',
+                            
                             data: {
                                 'todo': todo
                             },
                             success: function(data){
                                 console.log(data)
 
-                                var newRow = "<tr id='row"+data.todo.id+"'><td>"+data.todo.todo+"</td><td class='text-right'>"+data.updated_at+"</td><td class='text-center'><a class='btn btn-warning btn-xs' onclick='updateTodo("+data.todo.id+")'><i class='glyphicon glyphicon-remove'></i></a></td></tr>";
+                                var newRow = "<tr id='row"+data.todo.id+"'><td><a href='#'  data-toggle='popover' data-trigger='hover' data-content='"+data.todo.todo+"' style='text-decoration: none;'>"+data.todo.todo+"</a></td><td class='text-right'>"+data.updated_at+"</td><td class='text-right'><a class='btn btn-warning' onclick='updateTodo("+data.todo.id+")'><i class='glyphicon glyphicon-time'></i></a></td></tr>";
 
                                 $('table > tbody > tr:first').before(newRow);
-
+                                $("#todo").val('');
                                 toastr.success(data.success);
+                            }, error: function(data) {
+                                console.log(data);
                             }
                         });
 
@@ -121,13 +133,13 @@
 
                             } else {
                                 btn_class = 'btn-warning';
-                                glyphicon_class = 'glyphicon-remove';
+                                glyphicon_class = 'glyphicon-time';
                                 toastr.warning(data.success);
                             }
                             //console.log(btn_class);
 
 
-                            $("#row"+id).replaceWith("<tr id='row"+id+"'><td><a href='#'  data-toggle='popover' data-trigger='hover' data-content='"+data.todo.todo+"' style='text-decoration: none;'>"+data.todo.todo+"</a></td><td class='text-right'>"+data.updated_at+"</td><td class='text-center'><a class='btn "+btn_class+" btn-xs' onclick='updateTodo("+id+")'><i class='glyphicon "+glyphicon_class+"'></i></a></td></tr>");
+                            $("#row"+id).replaceWith("<tr id='row"+id+"'><td><a href='#'  data-toggle='popover' data-trigger='hover' data-content='"+data.todo.todo+"' style='text-decoration: none;'>"+data.todo.todo+"</a></td><td class='text-right'>"+data.updated_at+"</td><td class='text-right'><a class='btn "+btn_class+"' onclick='updateTodo("+id+")'><i class='glyphicon "+glyphicon_class+"'></i></a></td></tr>");
 
                             
                         }

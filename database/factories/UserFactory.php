@@ -25,6 +25,7 @@ $factory->define(App\User::class, function (Faker $faker) {
 $factory->define(App\Todo::class, function (Faker $faker) {
 	return [
 		'todo' => $faker->sentence(10),
-		'complete' => rand(0,1)
+		'complete' => rand(0,1),
+        'user_id' => App\User::all()->random()->id
 	];
 });
